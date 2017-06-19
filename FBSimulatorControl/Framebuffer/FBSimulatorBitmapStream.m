@@ -47,6 +47,11 @@ static NSDictionary<NSString *, id> *FBBitmapStreamPixelBufferAttributesFromPixe
   };
 }
 
+// Callback method types:
+@interface NSObject(FrameReceivedCB)
+- (void)framebufferReceived:(FBSimulatorBitmapStream *)stream;
+@end
+
 @interface FBSimulatorBitmapStream_Lazy : FBSimulatorBitmapStream
 
 @end
@@ -60,12 +65,12 @@ static NSDictionary<NSString *, id> *FBBitmapStreamPixelBufferAttributesFromPixe
 
 @end
 
-
 @interface FBSimulatorBitmapStream ()
 
 @property (nonatomic, weak, readonly) FBFramebufferSurface *surface;
 @property (nonatomic, strong, readonly) dispatch_queue_t writeQueue;
 @property (nonatomic, strong, readonly) id<FBControlCoreLogger> logger;
+@property (nonatomic, strong) id<FrameReceivedDelegate> callback;
 
 @property (nonatomic, strong, nullable, readwrite) id<FBFileConsumer> consumer;
 @property (nonatomic, assign, nullable, readwrite) CVPixelBufferRef pixelBuffer;
@@ -75,7 +80,13 @@ static NSDictionary<NSString *, id> *FBBitmapStreamPixelBufferAttributesFromPixe
 
 @end
 
+@interface MQSimulatorBitmapStream: FBSimulatorBitmapStream
+@end
+
 @implementation FBSimulatorBitmapStream
+- (NSDictionary<NSString *, id>*)getPixelBufferAttributes{
+  return self.pixelBufferAttributes;
+}
 
 + (dispatch_queue_t)writeQueue
 {
@@ -85,6 +96,11 @@ static NSDictionary<NSString *, id> *FBBitmapStreamPixelBufferAttributesFromPixe
 + (instancetype)lazyStreamWithSurface:(FBFramebufferSurface *)surface logger:(id<FBControlCoreLogger>)logger
 {
   return [[FBSimulatorBitmapStream_Lazy alloc] initWithSurface:surface writeQueue:self.writeQueue logger:logger];
+}
+
++ (instancetype)mqStream:(FBFramebufferSurface*)surface logger:(id<FBControlCoreLogger>) logger
+{
+    return [[MQSimulatorBitmapStream alloc] initWithSurface:surface writeQueue:self.writeQueue logger: logger];
 }
 
 + (instancetype)eagerStreamWithSurface:(FBFramebufferSurface *)surface framesPerSecond:(NSUInteger)framesPerSecond logger:(id<FBControlCoreLogger>)logger;
@@ -105,6 +121,11 @@ static NSDictionary<NSString *, id> *FBBitmapStreamPixelBufferAttributesFromPixe
   _logger = logger;
 
   return self;
+}
+
+// TODO (scott): Potentially fold this into initWithSurface. Avoiding that for now.
+- (void)setFrameReceivedCallback:(id)cb {
+    _callback = cb;
 }
 
 #pragma mark Public
@@ -220,11 +241,13 @@ static NSDictionary<NSString *, id> *FBBitmapStreamPixelBufferAttributesFromPixe
 
 + (void)writeBitmap:(CVPixelBufferRef)pixelBuffer consumer:(id<FBFileConsumer>)consumer
 {
+  NSLog(@"FBSimulatorBitmapStream: writeBitmap: enter");
   CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
-
   void *baseAddress = CVPixelBufferGetBaseAddress(pixelBuffer);
   size_t size = CVPixelBufferGetDataSize(pixelBuffer);
   NSData *data = [NSData dataWithBytesNoCopy:baseAddress length:size freeWhenDone:NO];
+  // Callback has to free the data. We'll need to check on performance when
+  // copying is involved.
   [consumer consumeData:data];
 
   CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
@@ -285,4 +308,42 @@ static NSDictionary<NSString *, id> *FBBitmapStreamPixelBufferAttributesFromPixe
   return YES;
 }
 
+@end
+
+// TODO (scott): Look into clearing/deleting this
+@implementation MQSimulatorBitmapStream
+
+- (void)didReceiveDamageRect:(CGRect)rect
+{
+    NSLog(@"MQSim.didReceiveDamageRect: enter");
+    [self pushFrame];
+}
+
+// TODO(scott): add callback to socket here
++ (instancetype)streamWithSurface:(FBFramebufferSurface *)surface logger:(id<FBControlCoreLogger>)logger
+{
+    NSLog(@"MQSim.lazyStreamWithSurface: enter");
+    return [[MQSimulatorBitmapStream alloc] initWithSurface:surface writeQueue:self.writeQueue logger:logger];
+}
+
+- (void)pushFrame
+{
+    NSLog(@"MQSim.pushFrame: enter");
+    if (!self.pixelBuffer || !self.consumer) {
+        return;
+    }
+    [MQSimulatorBitmapStream writeBitmap:self.pixelBuffer consumer:self.consumer];
+}
+
++ (void)writeBitmap:(CVPixelBufferRef)pixelBuffer consumer:(id<FBFileConsumer>)consumer
+{
+    NSLog(@"MQSimulatorBitmapStream: writeBitmap: enter");
+    CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
+    /*
+    void *baseAddress = CVPixelBufferGetBaseAddress(pixelBuffer);
+    size_t size = CVPixelBufferGetDataSize(pixelBuffer);
+    NSData *data = [NSData dataWithBytesNoCopy:baseAddress length:size freeWhenDone:NO];
+    */
+    CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
+}
 @end

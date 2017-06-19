@@ -6,7 +6,7 @@
  * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  */
-
+#import <CoreVideo/CoreVideo.h>
 #import <Foundation/Foundation.h>
 
 #import <FBControlCore/FBControlCore.h>
@@ -18,6 +18,10 @@ NS_ASSUME_NONNULL_BEGIN
 @class FBFramebufferSurface;
 @protocol FBFileConsumer;
 @protocol FBControlCoreLogger;
+
+@protocol FrameReceivedDelegate <NSObject>
+- (void)frameReceived:(CVPixelBufferRef)pixelBuffer;
+@end
 
 /**
  A Bitmap Stream of a Simulator's Framebuffer.
@@ -48,7 +52,11 @@ NS_ASSUME_NONNULL_BEGIN
  @return a new Bitmap Stream object.
  */
 + (instancetype)eagerStreamWithSurface:(FBFramebufferSurface *)surface framesPerSecond:(NSUInteger)framesPerSecond logger:(id<FBControlCoreLogger>)logger;
-
+- (NSDictionary<NSString *, id>*)getPixelBufferAttributes;
+- (instancetype)initWithSurface:(FBFramebufferSurface *)surface writeQueue:(dispatch_queue_t)writeQueue logger:(id<FBControlCoreLogger>)logger;
+- (void)pushFrame;
+- (void)setFrameReceivedCallback:(id)cb;
++ (void)writeBitmap:(CVPixelBufferRef)pixelBuffer consumer:(id<FBFileConsumer>)consumer;
 
 #pragma mark Public Methods
 
