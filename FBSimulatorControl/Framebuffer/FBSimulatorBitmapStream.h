@@ -55,7 +55,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSDictionary<NSString *, id>*)getPixelBufferAttributes;
 - (instancetype)initWithSurface:(FBFramebufferSurface *)surface writeQueue:(dispatch_queue_t)writeQueue logger:(id<FBControlCoreLogger>)logger;
 - (void)pushFrame;
-- (void)setFrameReceivedCallback:(id)cb;
+- (void)setFrameReceivedDelegate:(id<FrameReceivedDelegate>)delegate;
 + (void)writeBitmap:(CVPixelBufferRef)pixelBuffer consumer:(id<FBFileConsumer>)consumer;
 
 #pragma mark Public Methods
