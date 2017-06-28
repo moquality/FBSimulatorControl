@@ -242,7 +242,6 @@ static NSDictionary<NSString *, id> *FBBitmapStreamPixelBufferAttributesFromPixe
 {
   // TODO (scott): This is useful for debugging to see when frames should be showing up
   // Take it out soonish, though.
-  NSLog(@"FBSimulatorBitmapStream: writeBitmap: enter");
   CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
   void *baseAddress = CVPixelBufferGetBaseAddress(pixelBuffer);
   size_t size = CVPixelBufferGetDataSize(pixelBuffer);
