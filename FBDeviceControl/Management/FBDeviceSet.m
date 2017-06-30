@@ -91,6 +91,7 @@ static const NSTimeInterval FBDeviceSetDeviceManagerTickleTime = 2;
   if ([query excludesAll:FBiOSTargetTypeDevice]) {
     return @[];
   }
+  NSLog(@"All devices: %@; Query: %@", self.allDevices, query);
   return (NSArray<FBDevice *> *)[query filter:self.allDevices];
 }
 

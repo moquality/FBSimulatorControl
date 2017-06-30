@@ -19,7 +19,7 @@
 
 @interface FBSimulatorBridge ()
 
-@property (nonatomic, strong, readwrite) SimulatorBrijdge *bridge;
+@property (nonatomic, strong, readwrite) SimulatorBridge *bridge;
 
 @end
 

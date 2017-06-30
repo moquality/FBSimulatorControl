@@ -74,6 +74,10 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "record start"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "5B973BE7-CAAF-44A2-A50D-56D1F573CC92 boot --direct-launch"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
