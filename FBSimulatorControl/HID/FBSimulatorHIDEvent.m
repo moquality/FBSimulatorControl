@@ -521,6 +521,7 @@ static NSString *const KeyKeycode = @"keycode";
 
 + (instancetype)tapAtX:(double)x y:(double)y
 {
+  NSLog(@"FBSimulatorHIDEvent.tapAtX: Enter");
   return [self eventWithEvents:@[
     [self touchDownAtX:x y:y],
     [self touchUpAtX:x y:y],

@@ -15,7 +15,6 @@ import FBSimulatorControl
     let arguments = Array(CommandLine.arguments.dropFirst(1))
     let environment = ProcessInfo.processInfo.environment
     let (cli, writer, reporter, _) = CLI.fromArguments(arguments, environment: environment).bootstrap()
-    print("arguments: \(arguments); env: \(environment)")
     return CLIRunner(cli: cli, writer: writer, reporter: reporter).runForStatus()
   }
 }

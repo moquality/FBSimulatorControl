@@ -33,6 +33,8 @@ extern FBiOSTargetActionType const FBiOSTargetActionTypeHID;
  @return a new HID event.
  */
 + (instancetype)tapAtX:(double)x y:(double)y;
++ (instancetype)touchDownAtX:(double)x y:(double)y;
++ (instancetype)touchUpAtX:(double)x y:(double)y;
 
 /**
  A HID Event that is a down followed by an immediate up.

@@ -314,6 +314,7 @@
   }
 
   _configuration = configuration;
+  
   _simulator = simulator;
 
   return self;

@@ -16,6 +16,7 @@ extension Configuration {
     let logger = FBControlCoreGlobalConfiguration.defaultLogger
     try FBSimulatorControlFrameworkLoader.loadPrivateFrameworks(logger)
     let controlConfiguration = FBSimulatorControlConfiguration(deviceSetPath: self.deviceSetPath, options: self.managementOptions)
+    print("Device set path: %s; options: %@", self.deviceSetPath, self.managementOptions)
     return try FBSimulatorControl.withConfiguration(controlConfiguration, logger: logger)
   }
 
@@ -197,7 +198,6 @@ struct ActionRunner : Runner {
       let targets = self.context.query(query)
       let runner = SequenceRunner(runners: targets.map { target in
         if let simulator = target as? FBSimulator {
-          print("Simulator: \(simulator)")
           let context = self.context.replace((action, simulator))
           return SimulatorActionRunner(context: context)
         }
